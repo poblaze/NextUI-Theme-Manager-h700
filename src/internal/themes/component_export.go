@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"nextui-themes/internal/logging"
 	"nextui-themes/internal/system"
-	"nextui-themes/internal/ui"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -241,8 +240,6 @@ func ExportWallpapers(name string) error {
 
 	logger.DebugFn("Wallpaper export completed: %s", name)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Wallpapers exported to '%s'", name), "3")
 
 	return nil
 }
@@ -443,8 +440,6 @@ func ExportIcons(name string) error {
 
 	logger.DebugFn("Icon export completed: %s", name)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Icons exported to '%s'", name), "3")
 
 	return nil
 }
@@ -559,8 +554,6 @@ func ExportAccents(name string) error {
 
 	logger.DebugFn("Accent export completed: %s", name)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Accent colors exported to '%s'", name), "3")
 
 	return nil
 }
@@ -706,8 +699,6 @@ func ExportLEDs(name string) error {
 
 	logger.DebugFn("LED export completed: %s", name)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("LED settings exported to '%s'", name), "3")
 
 	return nil
 }
@@ -802,8 +793,6 @@ func ExportFonts(name string) error {
 
 	logger.DebugFn("Font export completed: %s", name)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Fonts exported to '%s'", name), "3")
 
 	return nil
 }
@@ -971,8 +960,6 @@ func ExportOverlays(name string) error {
 
 	logger.DebugFn("Overlay export completed: %s", name)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Overlays exported to '%s'", name), "3")
 
 	return nil
 }

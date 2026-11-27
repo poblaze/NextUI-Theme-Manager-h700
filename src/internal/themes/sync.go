@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"nextui-themes/internal/logging"
-	"nextui-themes/internal/ui"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -55,7 +54,6 @@ type SyncOptions struct {
 	RepoURL      string
 	Branch       string
 	LocalDirPath string
-	UI           bool // Whether to show UI progress messages
 }
 
 // GetDefaultSyncOptions returns default sync options
@@ -71,7 +69,6 @@ func GetDefaultSyncOptions() SyncOptions {
 		RepoURL:      RepoConfig.URL,
 		Branch:       RepoConfig.Branch,
 		LocalDirPath: cwd,
-		UI:           true,
 	}
 }
 
@@ -107,10 +104,8 @@ func SyncThemeCatalog(options SyncOptions) error {
 		}
 	}
 
-	if options.UI {
-		ui.ShowMessage("Theme catalog sync completed successfully!", "2")
-	}
-
+	// No success message here: callers wrap this in ui.ShowMessageWithOperation
+	// and show their own, and a second minui-presenter would fight it for the screen
 	return nil
 }
 
@@ -385,8 +380,7 @@ func DownloadThemePackage(themeName string) error {
 		return fmt.Errorf("no download URL found for theme '%s'", themeName)
 	}
 
-	// Show status message
-	ui.ShowMessage(fmt.Sprintf("Downloading theme '%s'...", themeName), "1")
+	// Progress and success messages are shown by the caller (ui.ShowMessageWithOperation)
 
 	// Create cache directory
 	cacheDir := filepath.Join(cwd, ".cache")
@@ -418,7 +412,6 @@ func DownloadThemePackage(themeName string) error {
 		logging.LogDebug("Warning: Failed to remove temporary ZIP file: %v", err)
 	}
 
-	ui.ShowMessage(fmt.Sprintf("Theme '%s' downloaded successfully!", themeName), "2")
 	return nil
 }
 
@@ -479,8 +472,7 @@ func DownloadComponentPackage(componentType, componentName string) error {
 		return fmt.Errorf("no download URL found for component '%s'", componentName)
 	}
 
-	// Show status message
-	ui.ShowMessage(fmt.Sprintf("Downloading %s component '%s'...", componentType, componentName), "1")
+	// Progress and success messages are shown by the caller (ui.ShowMessageWithOperation)
 
 	// Create cache directory
 	cacheDir := filepath.Join(cwd, ".cache")
@@ -512,7 +504,6 @@ func DownloadComponentPackage(componentType, componentName string) error {
 		logging.LogDebug("Warning: Failed to remove temporary ZIP file: %v", err)
 	}
 
-	ui.ShowMessage(fmt.Sprintf("%s component '%s' downloaded successfully!", componentType, componentName), "2")
 	return nil
 }
 

@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -36,22 +37,23 @@ func ShowMessageWithOperation(message string, operation func() error) error {
 	// Use explicit path to minui-presenter
 	minuiPresenterPath := system.Current().HelperPath(cwd, "minui-presenter")
 
-	// Start presenter with negative timeout (will stay until killed)
+	// Start presenter with negative timeout (stays up, ignoring buttons, until stopped).
+	// Nothing else may open minui-presenter or minui-list until it is stopped: two
+	// helpers fighting over the screen leave it black on H700.
 	cmd := exec.Command(minuiPresenterPath, "--message", message, "--timeout", "-1")
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 
 	// Start in background
 	if err := cmd.Start(); err != nil {
 		logging.LogDebug("Error starting minui-presenter: %v", err)
 		return err
 	}
+	started := time.Now()
 
-	// Ensure the process gets killed when we're done
-	defer func() {
-		if cmd.Process != nil {
-			cmd.Process.Kill()
-			logging.LogDebug("Killed minui-presenter process")
-		}
-	}()
+	// Watch the presenter so we can tell if it quits on its own
+	exited := make(chan error, 1)
+	go func() { exited <- cmd.Wait() }()
 
 	// Run the operation
 	operationErr := operation()
@@ -60,7 +62,36 @@ func ShowMessageWithOperation(message string, operation func() error) error {
 	// even if the operation is very fast
 	time.Sleep(500 * time.Millisecond)
 
+	stopPresenter(cmd, exited, started, &stderr)
 	return operationErr
+}
+
+// stopPresenter asks a background minui-presenter to exit cleanly (SIGTERM),
+// so it releases the screen before the next helper opens it. It falls back to
+// killing it, and logs anything the presenter wrote to stderr.
+func stopPresenter(cmd *exec.Cmd, exited <-chan error, started time.Time, stderr *bytes.Buffer) {
+	select {
+	case err := <-exited:
+		// It quit before we asked it to: the message vanished early
+		logging.LogDebug("minui-presenter exited on its own after %v (err: %v)", time.Since(started).Round(time.Millisecond), err)
+	default:
+		if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
+			logging.LogDebug("Could not send SIGTERM to minui-presenter: %v", err)
+		}
+		select {
+		case <-exited:
+			logging.LogDebug("Stopped minui-presenter after %v", time.Since(started).Round(time.Millisecond))
+		case <-time.After(2 * time.Second):
+			_ = cmd.Process.Kill()
+			<-exited
+			logging.LogDebug("minui-presenter ignored SIGTERM; killed it")
+		}
+	}
+
+	// Safe to read: the process has exited, so nothing is still writing to it
+	if output := strings.TrimSpace(stderr.String()); output != "" {
+		logging.LogDebug("minui-presenter stderr: %s", output)
+	}
 }
 
 // DisplayMinUiList displays a list of items using minui-list

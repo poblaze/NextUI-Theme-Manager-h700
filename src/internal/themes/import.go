@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"nextui-themes/internal/logging"
 	"nextui-themes/internal/system"
-	"nextui-themes/internal/ui"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -109,12 +108,11 @@ func ImportTheme(themeName string) error {
 	// 	}
 	// }
 
-	logger.DebugFn("Theme import completed successfully: %s", themeName)
+	logger.DebugFn("Theme import completed successfully: %s (by %s)",
+		manifest.ThemeInfo.Name, manifest.ThemeInfo.Author)
 
-	// Show success message to user
-	ui.ShowMessage(fmt.Sprintf("Theme '%s' by %s imported successfully!",
-		manifest.ThemeInfo.Name, manifest.ThemeInfo.Author), "3")
-
+	// The success message is shown by the caller, after the "Applying..."
+	// message (ui.ShowMessageWithOperation) has closed
 	return nil
 }
 

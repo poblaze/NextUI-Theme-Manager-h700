@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"nextui-themes/internal/logging"
 	"nextui-themes/internal/system"
-	"nextui-themes/internal/ui"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -114,8 +113,6 @@ func ImportWallpapers(componentPath string) error {
 
 	logger.DebugFn("Wallpaper import completed: %s", componentPath)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Wallpapers from '%s' applied successfully!", manifest.ComponentInfo.Name), "3")
 
 	return nil
 }
@@ -193,8 +190,6 @@ func ImportIcons(componentPath string) error {
 
 	logger.DebugFn("Icon import completed: %s", componentPath)
 
-	// Show success message to user
-	ui.ShowMessage(fmt.Sprintf("Icons from '%s' applied successfully!", manifest.ComponentInfo.Name), "3")
 
 	return nil
 }
@@ -326,8 +321,6 @@ func ImportAccents(componentPath string) error {
 
 	logger.DebugFn("Accent import completed: %s", componentPath)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Accent colors from '%s' applied successfully!", manifest.ComponentInfo.Name), "3")
 
 	return nil
 }
@@ -419,8 +412,6 @@ func ImportLEDs(componentPath string) error {
 
 	logger.DebugFn("LED import completed: %s", componentPath)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("LED settings from '%s' applied successfully!", manifest.ComponentInfo.Name), "3")
 
 	return nil
 }
@@ -496,8 +487,6 @@ func ImportFonts(componentPath string) error {
 
 	logger.DebugFn("Font import completed: %s", componentPath)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Fonts from '%s' applied successfully!", manifest.ComponentInfo.Name), "3")
 
 	return nil
 }
@@ -569,8 +558,6 @@ func ImportOverlays(componentPath string) error {
 
 	logger.DebugFn("Overlay import completed: %s", componentPath)
 
-	// Show success message
-	ui.ShowMessage(fmt.Sprintf("Overlays from '%s' applied successfully!", manifest.ComponentInfo.Name), "3")
 
 	return nil
 }

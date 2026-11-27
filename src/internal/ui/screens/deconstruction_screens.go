@@ -140,6 +140,8 @@ func HandleDeconstructConfirm(selection string, exitCode int) app.Screen {
 			if deconstructErr != nil {
 				logging.LogDebug("Error deconstructing theme: %v", deconstructErr)
 				ui.ShowMessage(fmt.Sprintf("Error: %s", deconstructErr), "3")
+			} else {
+				ui.ShowMessage(fmt.Sprintf("Theme '%s' deconstructed into component packages!", themeName), "3")
 			}
 		}
 		// Return to components menu

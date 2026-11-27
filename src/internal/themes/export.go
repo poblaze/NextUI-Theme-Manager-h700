@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"nextui-themes/internal/logging"
 	"nextui-themes/internal/system"
-	"nextui-themes/internal/ui"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -147,10 +146,8 @@ func ExportTheme() error {
 
 	logger.DebugFn("Theme export completed successfully: %s", themePath)
 
-	// Show success message to user
-	themeName = filepath.Base(themePath)
-	ui.ShowMessage(fmt.Sprintf("Theme exported successfully: %s", themeName), "3")
-
+	// The success message is shown by the caller, after the "Exporting..."
+	// message (ui.ShowMessageWithOperation) has closed
 	return nil
 }
 

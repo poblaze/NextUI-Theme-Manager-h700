@@ -6,7 +6,6 @@ package themes
 import (
 	"fmt"
 	"nextui-themes/internal/logging"
-	"nextui-themes/internal/ui"
 	"os"
 	"path/filepath"
 	"strings"
@@ -126,10 +125,8 @@ func DeconstructTheme(themeName string) error {
 
 	logger.DebugFn("Theme deconstruction completed successfully. %d components extracted.", componentsDeconstructed)
 
-	// Show success message to user
-	ui.ShowMessage(fmt.Sprintf("Theme '%s' deconstructed into %d component packages!",
-		manifest.ThemeInfo.Name, componentsDeconstructed), "3")
-
+	// The success message is shown by the caller, after the "Deconstructing..."
+	// message (ui.ShowMessageWithOperation) has closed
 	return nil
 }
 
