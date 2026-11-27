@@ -16,7 +16,9 @@ if [ "$ENABLE_LOGGING" -eq 1 ]; then
 
     # Log binary permissions
     echo "Binary permissions:" >> launch.log
-    ls -la theme-manager minui-list minui-presenter >> launch.log 2>&1
+    echo "Platform: $PLATFORM, device: $DEVICE" >> launch.log
+    chmod +x theme-manager bin/*/minui-list bin/*/minui-presenter 2>/dev/null
+    ls -la theme-manager bin/*/ >> launch.log 2>&1
 
     echo "Changed to directory: $(pwd)" >> launch.log
 
@@ -30,7 +32,7 @@ if [ "$ENABLE_LOGGING" -eq 1 ]; then
     echo "Exit code: $?" >> launch.log
 else
     # Make sure binaries are executable without logging
-    chmod +x theme-manager minui-list minui-presenter 2>/dev/null
+    chmod +x theme-manager bin/*/minui-list bin/*/minui-presenter 2>/dev/null
 
     # Launch without output redirection
     ./theme-manager 2>/dev/null

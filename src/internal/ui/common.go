@@ -7,9 +7,9 @@ import (
 	"bytes"
 	"fmt"
 	"nextui-themes/internal/logging"
+	"nextui-themes/internal/system"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -34,7 +34,7 @@ func ShowMessageWithOperation(message string, operation func() error) error {
 	}
 
 	// Use explicit path to minui-presenter
-	minuiPresenterPath := filepath.Join(cwd, "minui-presenter")
+	minuiPresenterPath := system.Current().HelperPath(cwd, "minui-presenter")
 
 	// Start presenter with negative timeout (will stay until killed)
 	cmd := exec.Command(minuiPresenterPath, "--message", message, "--timeout", "-1")
@@ -112,7 +112,7 @@ func DisplayMinUiList(list string, format string, title string, extraArgs ...str
 	logging.LogDebug("minui-list args: %v", args)
 
 	// Use explicit path to minui-list
-	minuiListPath := filepath.Join(cwd, "minui-list")
+	minuiListPath := system.Current().HelperPath(cwd, "minui-list")
 	cmd := exec.Command(minuiListPath, args...)
 
 	var stderrbuf bytes.Buffer
@@ -159,7 +159,7 @@ func ShowMessage(message string, timeout string) {
 	}
 
 	// Use explicit path to minui-presenter
-	minuiPresenterPath := filepath.Join(cwd, "minui-presenter")
+	minuiPresenterPath := system.Current().HelperPath(cwd, "minui-presenter")
 
 	args := []string{"--message", message, "--timeout", timeout}
 	cmd := exec.Command(minuiPresenterPath, args...)

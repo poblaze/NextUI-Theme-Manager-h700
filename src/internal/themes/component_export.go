@@ -327,7 +327,7 @@ func ExportIcons(name string) error {
 
 	// Export Tools icon
 	toolsParentDir := filepath.Dir(systemPaths.Tools)
-	toolsIcon := filepath.Join(toolsParentDir, ".media", "tg5040.png")
+	toolsIcon := filepath.Join(toolsParentDir, ".media", system.Current().ToolsIconName())
 	if _, err := os.Stat(toolsIcon); err == nil {
 		destPath := filepath.Join(exportPath, "SystemIcons", "Tools.png")
 		if err := CopyFile(toolsIcon, destPath); err != nil {
@@ -361,7 +361,7 @@ func ExportIcons(name string) error {
 				// Skip special icons we already handled
 				if entry.Name() == "Recently Played.png" ||
 					entry.Name() == "Collections.png" ||
-					entry.Name() == "tg5040.png" {
+					entry.Name() == system.Current().ToolsIconName() {
 					continue
 				}
 
@@ -502,7 +502,7 @@ func ExportAccents(name string) error {
 	accentManifest := manifestObj.(*AccentManifest)
 
 	// Read current accent settings
-	settingsPath := "/mnt/SDCARD/.userdata/shared/minuisettings.txt"
+	settingsPath := system.Current().MinuiSettingsPath()
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
 		return fmt.Errorf("accent settings file not found: %s", settingsPath)
 	}
@@ -573,6 +573,10 @@ func ExportLEDs(name string) error {
 
 	logger.DebugFn("Starting LED export: %s", name)
 
+	if !system.Current().SupportsLEDs() {
+		return fmt.Errorf("LED components are not supported on %s", system.Current().Name)
+	}
+
 	// Get the current directory
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -618,7 +622,7 @@ func ExportLEDs(name string) error {
 	ledManifest := manifestObj.(*LEDManifest)
 
 	// Read current LED settings
-	settingsPath := "/mnt/SDCARD/.userdata/shared/ledsettings_brick.txt"
+	settingsPath := system.Current().LEDSettingsPath()
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
 		return fmt.Errorf("LED settings file not found: %s", settingsPath)
 	}
@@ -762,10 +766,10 @@ func ExportFonts(name string) error {
 
 	// Define font paths
 	fontPaths := map[string]string{
-		"OG":          "/mnt/SDCARD/.system/res/font2.ttf",
-		"OG.backup":   "/mnt/SDCARD/.system/res/font2.backup.ttf",
-		"Next":        "/mnt/SDCARD/.system/res/font1.ttf",
-		"Next.backup": "/mnt/SDCARD/.system/res/font1.backup.ttf",
+		"OG":          system.Current().FontPath("font2.ttf"),
+		"OG.backup":   system.Current().FontPath("font2.backup.ttf"),
+		"Next":        system.Current().FontPath("font1.ttf"),
+		"Next.backup": system.Current().FontPath("font1.backup.ttf"),
 	}
 
 	// Export each font and update manifest
@@ -1115,7 +1119,7 @@ func EnsureComponentDirectories() error {
 	// Create main Components directory
 	componentsDir := filepath.Join(cwd, "Components")
 	if err := os.MkdirAll(componentsDir, 0755); err != nil {
-		return fmt.Errorf("error creating Components directory: %w", componentsDir, err)
+		return fmt.Errorf("error creating Components directory %s: %w", componentsDir, err)
 	}
 
 	// Component subdirectories to create

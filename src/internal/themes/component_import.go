@@ -220,7 +220,7 @@ func ImportAccents(componentPath string) error {
 	}
 
 	// Apply accent settings directly from manifest
-	settingsPath := "/mnt/SDCARD/.userdata/shared/minuisettings.txt"
+	settingsPath := system.Current().MinuiSettingsPath()
 
 	// Map of color keys to their values from the manifest
 	colorValues := map[string]string{
@@ -340,6 +340,10 @@ func ImportLEDs(componentPath string) error {
 
 	logger.DebugFn("Starting LED import: %s", componentPath)
 
+	if !system.Current().SupportsLEDs() {
+		return fmt.Errorf("LED components are not supported on %s", system.Current().Name)
+	}
+
 	// Load the component manifest
 	manifestObj, err := LoadComponentManifest(componentPath)
 	if err != nil {
@@ -353,7 +357,7 @@ func ImportLEDs(componentPath string) error {
 	}
 
 	// Apply LED settings from manifest
-	settingsPath := "/mnt/SDCARD/.userdata/shared/ledsettings_brick.txt"
+	settingsPath := system.Current().LEDSettingsPath()
 
 	// Create content for ledsettings_brick.txt
 	var content strings.Builder
@@ -459,9 +463,9 @@ func ImportFonts(componentPath string) error {
 				// Determine correct backup path format
 				var backupPath string
 				if strings.HasSuffix(dstPath, "font1.ttf") {
-					backupPath = "/mnt/SDCARD/.system/res/font1.backup.ttf"
+					backupPath = system.Current().FontPath("font1.backup.ttf")
 				} else if strings.HasSuffix(dstPath, "font2.ttf") {
-					backupPath = "/mnt/SDCARD/.system/res/font2.backup.ttf"
+					backupPath = system.Current().FontPath("font2.backup.ttf")
 				} else {
 					backupPath = dstPath + ".backup.ttf" // Fallback
 				}
@@ -709,7 +713,7 @@ func cleanupExistingIcons(systemPaths *system.SystemPaths, logger *Logger) error
 				if !tagRegex.MatchString(entry.Name()) &&
 					entry.Name() != "Recently Played.png" &&
 					entry.Name() != "Collections.png" &&
-					entry.Name() != "tg5040.png" {
+					entry.Name() != system.Current().ToolsIconName() {
 					continue
 				}
 
@@ -743,11 +747,11 @@ func cleanupExistingIcons(systemPaths *system.SystemPaths, logger *Logger) error
 		}
 	}
 
-	// Tools icon - use parent path of Tools since Tools path includes tg5040
-	toolsParentDir := filepath.Dir(systemPaths.Tools) // Gets /mnt/SDCARD/Tools
+	// Tools icon - use parent path of Tools since Tools path includes the platform
+	toolsParentDir := filepath.Dir(systemPaths.Tools) // Gets <SD card>/Tools
 	toolsMediaDir := filepath.Join(toolsParentDir, ".media")
 	if _, err := os.Stat(toolsMediaDir); !os.IsNotExist(err) {
-		toolsIcon := filepath.Join(toolsMediaDir, "tg5040.png")
+		toolsIcon := filepath.Join(toolsMediaDir, system.Current().ToolsIconName())
 		if err := os.Remove(toolsIcon); err != nil && !os.IsNotExist(err) {
 			logger.DebugFn("Warning: Could not remove Tools icon: %v", err)
 		} else if err == nil {

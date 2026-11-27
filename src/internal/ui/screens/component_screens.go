@@ -26,10 +26,12 @@ func ComponentsMenuScreen() (string, int) {
 		"Icons",
 		"Accents",
 		"Overlays",
-		"LEDs",
-		"Fonts",
-		// "Deconstruct..." option has been removed
 	}
+	// LED components use the TrimUI Brick LED layout; hide them elsewhere
+	if system.Current().SupportsLEDs() {
+		menu = append(menu, "LEDs")
+	}
+	menu = append(menu, "Fonts")
 
 	return ui.DisplayMinUiList(strings.Join(menu, "\n"), "text", "Components")
 }

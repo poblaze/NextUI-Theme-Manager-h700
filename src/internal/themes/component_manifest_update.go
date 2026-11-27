@@ -514,9 +514,9 @@ func UpdateIconManifest(componentPath string, systemPaths *system.SystemPaths, l
 					}
 
 				case "Tools.png":
-					// Get parent directory of Tools since Tools path includes tg5040
+					// Get parent directory of Tools since Tools path includes the platform
 					toolsParentDir := filepath.Dir(systemPaths.Tools)
-					systemPath = filepath.Join(toolsParentDir, ".media", "tg5040.png")
+					systemPath = filepath.Join(toolsParentDir, ".media", system.Current().ToolsIconName())
 					metadata = map[string]string{
 						"SystemName": "Tools",
 						"IconType":   "System",
@@ -832,10 +832,10 @@ func UpdateFontManifest(componentPath string, logger *Logger) error {
 
 	// Define system paths for fonts - CORRECTED PATHS
 	systemPaths := map[string]string{
-		"OG":          "/mnt/SDCARD/.system/res/font2.ttf",
-		"OG.backup":   "/mnt/SDCARD/.system/res/font2.backup.ttf", // Corrected extension
-		"Next":        "/mnt/SDCARD/.system/res/font1.ttf",
-		"Next.backup": "/mnt/SDCARD/.system/res/font1.backup.ttf", // Corrected extension
+		"OG":          system.Current().FontPath("font2.ttf"),
+		"OG.backup":   system.Current().FontPath("font2.backup.ttf"), // Corrected extension
+		"Next":        system.Current().FontPath("font1.ttf"),
+		"Next.backup": system.Current().FontPath("font1.backup.ttf"), // Corrected extension
 	}
 
 	// Check for each font file

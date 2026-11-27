@@ -8,10 +8,10 @@ import (
 	_ "github.com/UncleJunVIP/certifiable"
 	"nextui-themes/internal/app"
 	"nextui-themes/internal/logging"
+	"nextui-themes/internal/system"
 	"nextui-themes/internal/themes"
 	"nextui-themes/internal/ui/screens"
 	"os"
-	"path/filepath"
 	"runtime"
 )
 
@@ -51,7 +51,7 @@ func main() {
 	}
 
 	// Check if minui-list exists in the application directory
-	minuiListPath := filepath.Join(cwd, "minui-list")
+	minuiListPath := system.Current().HelperPath(cwd, "minui-list")
 	_, err = os.Stat(minuiListPath)
 	if err != nil {
 		logging.LogDebug("minui-list not found at %s: %v", minuiListPath, err)
@@ -59,7 +59,7 @@ func main() {
 	}
 
 	// Check if minui-presenter exists in the application directory
-	minuiPresenterPath := filepath.Join(cwd, "minui-presenter")
+	minuiPresenterPath := system.Current().HelperPath(cwd, "minui-presenter")
 	_, err = os.Stat(minuiPresenterPath)
 	if err != nil {
 		logging.LogDebug("minui-presenter not found at %s: %v", minuiPresenterPath, err)
