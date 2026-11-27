@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"nextui-themes/internal/logging"
+	"nextui-themes/internal/system"
 	"nextui-themes/internal/themes"
 )
 
@@ -23,19 +24,21 @@ func Initialize() error {
 		return err
 	}
 
-	// Set up environment variables for the TrimUI brick
-	logging.LogDebug("Setting environment variables")
+	// Set up environment variables. The NextUI launcher normally exports these;
+	// only fill in the ones it left unset so the UI helpers still find their libraries.
+	platform := system.Current()
+	logging.LogDebug("Platform: %s, device: %s, SD card: %s", platform.Name, platform.Device, platform.SDCardPath)
 
-	_ = os.Setenv("DEVICE", "brick")
-	_ = os.Setenv("PLATFORM", "tg5040")
+	setEnvIfEmpty("PLATFORM", platform.Name)
+	setEnvIfEmpty("DEVICE", platform.Device)
+	setEnvIfEmpty("SDCARD_PATH", platform.SDCardPath)
+	setEnvIfEmpty("LD_LIBRARY_PATH", platform.LibraryPath())
 
 	// Add current directory to PATH instead of replacing it
 	existingPath := os.Getenv("PATH")
 	newPath := cwd + ":" + existingPath
 	_ = os.Setenv("PATH", newPath)
 	logging.LogDebug("Updated PATH: %s", newPath)
-
-	_ = os.Setenv("LD_LIBRARY_PATH", "/mnt/SDCARD/.system/tg5040/lib:/usr/trimui/lib")
 
 	// Create theme directory structure
 	logging.LogDebug("Creating theme directories")
@@ -88,4 +91,11 @@ func Initialize() error {
 
 	logging.LogDebug("Initialization complete")
 	return nil
+}
+
+// setEnvIfEmpty sets an environment variable only if it is not already set
+func setEnvIfEmpty(key, value string) {
+	if os.Getenv(key) == "" && value != "" {
+		_ = os.Setenv(key, value)
+	}
 }

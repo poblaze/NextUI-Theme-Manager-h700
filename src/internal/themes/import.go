@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"nextui-themes/internal/logging"
 	"nextui-themes/internal/system"
-	"nextui-themes/internal/ui"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -109,12 +108,11 @@ func ImportTheme(themeName string) error {
 	// 	}
 	// }
 
-	logger.DebugFn("Theme import completed successfully: %s", themeName)
+	logger.DebugFn("Theme import completed successfully: %s (by %s)",
+		manifest.ThemeInfo.Name, manifest.ThemeInfo.Author)
 
-	// Show success message to user
-	ui.ShowMessage(fmt.Sprintf("Theme '%s' by %s imported successfully!",
-		manifest.ThemeInfo.Name, manifest.ThemeInfo.Author), "3")
-
+	// The success message is shown by the caller, after the "Applying..."
+	// message (ui.ShowMessageWithOperation) has closed
 	return nil
 }
 
@@ -289,9 +287,9 @@ func updateIconMappings(themePath string, manifest *ThemeManifest, systemPaths *
 					}
 
 				case "Tools":
-					// Get parent directory of Tools path since it includes tg5040
+					// Get parent directory of Tools path since it includes the platform
 					toolsParentDir := filepath.Dir(systemPaths.Tools)
-					systemPath = filepath.Join(toolsParentDir, ".media", "tg5040.png")
+					systemPath = filepath.Join(toolsParentDir, ".media", system.Current().ToolsIconName())
 					metadata = map[string]string{
 						"SystemName": "Tools",
 						"IconType":   "System",
@@ -579,10 +577,10 @@ func updateFontMappings(themePath string, manifest *ThemeManifest, systemPaths *
 
 	// Define system paths for fonts - CORRECTED PATHS
 	fontSystemPaths := map[string]string{
-		"OG":          "/mnt/SDCARD/.system/res/font2.ttf",
-		"OG.backup":   "/mnt/SDCARD/.system/res/font2.backup.ttf",
-		"Next":        "/mnt/SDCARD/.system/res/font1.ttf",
-		"Next.backup": "/mnt/SDCARD/.system/res/font1.backup.ttf",
+		"OG":          system.Current().FontPath("font2.ttf"),
+		"OG.backup":   system.Current().FontPath("font2.backup.ttf"),
+		"Next":        system.Current().FontPath("font1.ttf"),
+		"Next.backup": system.Current().FontPath("font1.backup.ttf"),
 	}
 
 	// Initialize font mappings map if it doesn't exist
@@ -1067,7 +1065,7 @@ func updateLEDSettings(themePath string, manifest *ThemeManifest, logger *Logger
 // This function should replace the existing applyAccentSettings in import.go
 func applyAccentSettings(manifest *ThemeManifest, logger *Logger) error {
 	// Get path to settings file
-	settingsPath := "/mnt/SDCARD/.userdata/shared/minuisettings.txt"
+	settingsPath := system.Current().MinuiSettingsPath()
 
 	// Map of color keys to their values from the manifest
 	colorValues := map[string]string{
@@ -1219,7 +1217,7 @@ func applyLEDSettings(manifest *ThemeManifest, logger *Logger) error {
 	content.WriteString("\n")
 
 	// Get path to settings file - FIXED PATH
-	settingsPath := "/mnt/SDCARD/.userdata/shared/ledsettings_brick.txt"
+	settingsPath := system.Current().LEDSettingsPath()
 
 	// Write settings to file
 	if err := os.WriteFile(settingsPath, []byte(content.String()), 0644); err != nil {

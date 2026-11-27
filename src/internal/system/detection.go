@@ -29,10 +29,11 @@ type SystemPaths struct {
 
 // GetSystemPaths returns the paths to all system directories
 func GetSystemPaths() (*SystemPaths, error) {
-	// Define base paths
-	rootPath := "/mnt/SDCARD"
+	// Define base paths for the current platform
+	platform := Current()
+	rootPath := platform.SDCardPath
 	recentlyPath := filepath.Join(rootPath, "Recently Played")
-	toolsPath := filepath.Join(rootPath, "Tools/tg5040")
+	toolsPath := platform.ToolsPath()
 	romsPath := filepath.Join(rootPath, "Roms")
 
 	// Create the result structure

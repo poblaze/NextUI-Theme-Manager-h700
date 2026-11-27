@@ -26,10 +26,12 @@ func ComponentsMenuScreen() (string, int) {
 		"Icons",
 		"Accents",
 		"Overlays",
-		"LEDs",
-		"Fonts",
-		// "Deconstruct..." option has been removed
 	}
+	// LED components use the TrimUI Brick LED layout; hide them elsewhere
+	if system.Current().SupportsLEDs() {
+		menu = append(menu, "LEDs")
+	}
+	menu = append(menu, "Fonts")
 
 	return ui.DisplayMinUiList(strings.Join(menu, "\n"), "text", "Components")
 }
@@ -545,11 +547,19 @@ func HandleDownloadComponents(selection string, exitCode int) app.Screen {
 
 			if !fileExists(localComponentPath) {
 				// Download the component package if not already installed
-				if err := themes.DownloadComponentPackage(componentType, selection); err != nil {
-					logging.LogDebug("Error downloading component: %v", err)
-					ui.ShowMessage(fmt.Sprintf("Error: %s", err), "3")
+				downloadErr := ui.ShowMessageWithOperation(
+					fmt.Sprintf("Downloading %s component '%s'...", componentType, selection),
+					func() error {
+						return themes.DownloadComponentPackage(componentType, selection)
+					},
+				)
+				if downloadErr != nil {
+					logging.LogDebug("Error downloading component: %v", downloadErr)
+					ui.ShowMessage(fmt.Sprintf("Error: %s", downloadErr), "3")
 					return app.Screens.ComponentOptions
 				}
+
+				ui.ShowMessage(fmt.Sprintf("%s component '%s' downloaded successfully!", componentType, selection), "2")
 			} else {
 				logging.LogDebug("Component '%s' already installed, skipping download", selection)
 			}

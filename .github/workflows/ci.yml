@@ -9,6 +9,8 @@ on:
   push:
     branches:
       - main
+  # lets a build of any branch be started from the Actions tab
+  workflow_dispatch:
 
 permissions:
   attestations: write

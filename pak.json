@@ -10,7 +10,8 @@
     "BRICK": "documents/previews/Consolized.theme.png"
   },
   "platforms": [
-    "tg5040"
+    "tg5040",
+    "h700"
   ],
   "launch": "launch.sh"
 }

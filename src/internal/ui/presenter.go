@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"nextui-themes/internal/logging"
+	"nextui-themes/internal/system"
 )
 
 // GalleryItem represents an item in a gallery display
@@ -109,7 +109,7 @@ func DisplayImageGallery(items []GalleryItem, title string) (string, int) {
 			"--inaction-text", "PREV",
 			"--inaction-show")
 
-		minuiPresenterPath := filepath.Join(cwd, "minui-presenter")
+		minuiPresenterPath := system.Current().HelperPath(cwd, "minui-presenter")
 		cmd := exec.Command(minuiPresenterPath, args...)
 
 		var stderr bytes.Buffer

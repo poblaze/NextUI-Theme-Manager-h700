@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"nextui-themes/internal/logging"
 	"nextui-themes/internal/system"
-	"nextui-themes/internal/ui"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -147,10 +146,8 @@ func ExportTheme() error {
 
 	logger.DebugFn("Theme export completed successfully: %s", themePath)
 
-	// Show success message to user
-	themeName = filepath.Base(themePath)
-	ui.ShowMessage(fmt.Sprintf("Theme exported successfully: %s", themeName), "3")
-
+	// The success message is shown by the caller, after the "Exporting..."
+	// message (ui.ShowMessageWithOperation) has closed
 	return nil
 }
 
@@ -462,9 +459,9 @@ func exportIcons(themePath string, manifest *ThemeManifest, systemPaths *system.
 		}
 	}
 
-	// Tools icon - use parent path of Tools since Tools path includes tg5040
-	toolsParentDir := filepath.Dir(systemPaths.Tools) // Gets /mnt/SDCARD/Tools
-	toolsIcon := filepath.Join(toolsParentDir, ".media", "tg5040.png")
+	// Tools icon - use parent path of Tools since Tools path includes the platform
+	toolsParentDir := filepath.Dir(systemPaths.Tools) // Gets <SD card>/Tools
+	toolsIcon := filepath.Join(toolsParentDir, ".media", system.Current().ToolsIconName())
 	if _, err := os.Stat(toolsIcon); err == nil {
 		destPath := filepath.Join(themePath, "Icons", "SystemIcons", "Tools.png")
 		if err := CopyFile(toolsIcon, destPath); err != nil {
@@ -530,7 +527,7 @@ func exportIcons(themePath string, manifest *ThemeManifest, systemPaths *system.
 				// Skip other special icons like Recently Played that we handle separately
 				if entry.Name() == "Recently Played.png" ||
 					entry.Name() == "Collections.png" ||
-					entry.Name() == "tg5040.png" {
+					entry.Name() == system.Current().ToolsIconName() {
 					continue
 				}
 
@@ -774,10 +771,10 @@ func exportFonts(themePath string, manifest *ThemeManifest, logger *Logger) erro
 
 	// Define font paths to check - CORRECTED PATHS
 	fontPaths := map[string]string{
-		"OG":          "/mnt/SDCARD/.system/res/font2.ttf",
-		"OG.backup":   "/mnt/SDCARD/.system/res/font2.backup.ttf", // Corrected extension
-		"Next":        "/mnt/SDCARD/.system/res/font1.ttf",
-		"Next.backup": "/mnt/SDCARD/.system/res/font1.backup.ttf", // Corrected extension
+		"OG":          system.Current().FontPath("font2.ttf"),
+		"OG.backup":   system.Current().FontPath("font2.backup.ttf"), // Corrected extension
+		"Next":        system.Current().FontPath("font1.ttf"),
+		"Next.backup": system.Current().FontPath("font1.backup.ttf"), // Corrected extension
 	}
 
 	// Check and export each font
@@ -817,7 +814,7 @@ func exportFonts(themePath string, manifest *ThemeManifest, logger *Logger) erro
 // readAccentSettingsFromSystem reads accent settings from the system and updates the manifest
 func readAccentSettingsFromSystem(manifest *ThemeManifest, logger *Logger) error {
 	// Path to the accent settings file
-	settingsPath := "/mnt/SDCARD/.userdata/shared/minuisettings.txt"
+	settingsPath := system.Current().MinuiSettingsPath()
 
 	// Check if settings file exists
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
@@ -873,8 +870,14 @@ func readAccentSettingsFromSystem(manifest *ThemeManifest, logger *Logger) error
 
 // readLEDSettingsFromSystem reads LED settings from the system and updates the manifest
 func readLEDSettingsFromSystem(manifest *ThemeManifest, logger *Logger) error {
+	// LED settings use the TrimUI Brick layout; skip them on other platforms
+	if !system.Current().SupportsLEDs() {
+		logger.DebugFn("Skipping LED settings: not supported on %s", system.Current().Name)
+		return nil
+	}
+
 	// Path to the LED settings file
-	settingsPath := "/mnt/SDCARD/.userdata/shared/ledsettings_brick.txt"
+	settingsPath := system.Current().LEDSettingsPath()
 
 	// Check if settings file exists
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
